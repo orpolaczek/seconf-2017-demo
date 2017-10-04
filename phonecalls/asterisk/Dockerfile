@@ -4,15 +4,15 @@ MAINTAINER Doug Smith <info@laboratoryb.org>
 
 RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 RUN yum update -y
-RUN yum groups mark convert
+RUN yum groups -y  mark convert
 RUN yum groupinstall -y "development tools"
 RUN yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel expat-devel
 RUN yum install wget python2.7 kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make git -y
 
 WORKDIR /tmp/
-# Python 2.7.13:
-RUN yum upgrade python-setuptools
-RUN yum install python-pip python-wheel
+RUN yum upgrade -y  python-setuptools
+RUN yum install -y  python-pip python-wheel
+RUN pip install --upgrade pip
 RUN pip install pyotp
 
 # Download asterisk.
