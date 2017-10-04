@@ -1,4 +1,9 @@
+protobuf>=3.0
+gcloud
 selenium
+google-gax
+google-cloud
+gapic-google-longrunning
 google-api-python-client
 google-cloud-speech
 nexmo
