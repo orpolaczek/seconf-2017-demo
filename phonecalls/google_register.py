@@ -163,15 +163,15 @@ class GoogleRegisterSanityTest(unittest.TestCase):
 
             # Check we got the code twice and both are the same to have 100% certain
             self.assertTrue(len(matches) is 2 and matches[0] == matches[1])
-            received_pin = matches[0]
+            received_pin = self.normalize_transcript(matches[0])
             print("Got verification code: {}".format(received_pin))
 
             code_elm = driver.find_element_by_id("verify-phone-input")
             if code_elm:
                 code_elm.send_keys(received_pin)
 
-            time.sleep(15)  # this is demo visual sleep
-            return
+            time.sleep(10)  # this is demo visual sleep
+
             finish_elm = driver.find_element_by_name("VerifyPhone")
             if finish_elm:
                 finish_elm.click()
