@@ -1,5 +1,11 @@
-import os
+# SERIOUSLY
+# This demo is for EDUCATIONAL purposes ONLY!
+# Don't mess with Google
+# Don't abuse this code
+# Don't do things that might violate Google's T&C
+# Use at your own risk!
 
+import os
 import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -10,7 +16,6 @@ from selenium.common import exceptions
 from utils.gcloud_transcript import GCloudTranscript
 import unittest
 import time
-import pyotp
 from mock_user import MockUser
 
 
@@ -43,34 +48,36 @@ class GoogleRegisterSanityTest(unittest.TestCase):
     def test_login_with_otp(self):
         driver = self.driver
 
+        mock_user = MockUser
+        
         # Open Google registration
         driver.get("https://accounts.google.com/SignUp")
         self.observe_until_elm_id_appear("name-form-element", 5)
-
+        
         # Enter first & last name
         fname_elm = driver.find_element_by_id("FirstName")
         if fname_elm:
-            fname_elm.send_keys(MockUser.F_NAME)
+            fname_elm.send_keys(mock_user.F_NAME)
 
         lname_elm = driver.find_element_by_id("LastName")
         if lname_elm:
-            lname_elm.send_keys(MockUser.L_NAME)
+            lname_elm.send_keys(mock_user.L_NAME)
 
         username_elm = driver.find_element_by_id("GmailAddress")
         if username_elm:
-            username_elm.send_keys(MockUser.USERNAME)
+            username_elm.send_keys(mock_user.USERNAME)
 
         passwd_elm = driver.find_element_by_id("Passwd")
         if passwd_elm:
-            passwd_elm.send_keys(MockUser.PASSWORD)
+            passwd_elm.send_keys(mock_user.PASSWORD)
 
         passwd2_elm = driver.find_element_by_id("PasswdAgain")
         if passwd2_elm:
-            passwd2_elm.send_keys(MockUser.PASSWORD)
+            passwd2_elm.send_keys(mock_user.PASSWORD)
 
         bday_elm = driver.find_element_by_id("BirthDay")
         if bday_elm:
-            bday_elm.send_keys(MockUser.BD_DAY)
+            bday_elm.send_keys(mock_user.BD_DAY)
 
         # Press month label before month
         month_label_elm = driver.find_element_by_id("BirthMonth")
@@ -78,7 +85,7 @@ class GoogleRegisterSanityTest(unittest.TestCase):
             month_label_elm.click()
             time.sleep(1)
 
-        bmonth_elm = driver.find_element_by_id(":{}".format(MockUser.BD_MONTH))
+        bmonth_elm = driver.find_element_by_id(":{}".format(mock_user.BD_MONTH))
         if bmonth_elm:
             try:
                 bmonth_elm.click()
@@ -88,7 +95,7 @@ class GoogleRegisterSanityTest(unittest.TestCase):
 
         byear_elm = driver.find_element_by_id("BirthYear")
         if byear_elm:
-            byear_elm.send_keys(MockUser.BD_YEAR)
+            byear_elm.send_keys(mock_user.BD_YEAR)
 
         gender_elm = driver.find_element_by_id("Gender")
         if gender_elm:
@@ -105,83 +112,79 @@ class GoogleRegisterSanityTest(unittest.TestCase):
         phone_elm = driver.find_element_by_id("RecoveryPhoneNumber")
         if phone_elm:
             phone_elm.clear()
-            phone_elm.send_keys(MockUser.PHONE)
+            phone_elm.send_keys(mock_user.PHONE)
 
-        try:
-            submit_elm = driver.find_element_by_id("submitbutton")
-            if submit_elm:
-                submit_elm.click()
+        submit_elm = driver.find_element_by_id("submitbutton")
+        if submit_elm:
+            submit_elm.click()
 
-            self.observe_until_elm_id_appear("tos-scroll-button", 1)
-            # scroll to TOS:
-            tos_btn = driver.find_element_by_id("tos-scroll-button")
-            if tos_btn:
-                for i in range(0, 5):
-                    try:
-                        tos_btn.click()
-                        time.sleep(1)
-                    except exceptions.WebDriverException:
-                        continue
+        self.observe_until_elm_id_appear("tos-scroll-button", 1)
+        # scroll to TOS:
+        tos_btn = driver.find_element_by_id("tos-scroll-button")
+        if tos_btn:
+            for i in range(0, 5):
+                try:
+                    tos_btn.click()
+                    time.sleep(1)
+                except exceptions.WebDriverException:
+                    continue
 
-            agree_and_send_elm = driver.find_element_by_id("iagreebutton")
-            if agree_and_send_elm:
-                agree_and_send_elm.click()
+        agree_and_send_elm = driver.find_element_by_id("iagreebutton")
+        if agree_and_send_elm:
+            agree_and_send_elm.click()
 
-            self.observe_until_elm_id_appear("next-button")
-            time.sleep(1)
+        self.observe_until_elm_id_appear("next-button")
+        time.sleep(1)
 
-            phone_verification_elm = driver.find_element_by_id("signupidvmethod-voice")
-            if phone_verification_elm:
-                phone_verification_elm.click()
+        phone_verification_elm = driver.find_element_by_id("signupidvmethod-voice")
+        if phone_verification_elm:
+            phone_verification_elm.click()
 
-            next_elm = driver.find_element_by_id("next-button")
-            if next_elm:
-                self.actionchains.move_to_element(next_elm)
-                next_elm.click()
+        next_elm = driver.find_element_by_id("next-button")
+        if next_elm:
+            self.actionchains.move_to_element(next_elm)
+            next_elm.click()
 
-            # Now - allow 70 seconds for the phone to answer before transcribing
-            # TODO: replace with observe...
+        recording_file_path = os.path.join(
+            os.path.dirname(__file__),
+            'recordings',
+            'latest-record.wav')
 
-            recording_file_path = os.path.join(
-                os.path.dirname(__file__),
-                'recordings',
-                'latest-record.wav')
+        print("Observing for an updated call recording")
+        self.assertTrue(self.observe_for_file_ts_change(recording_file_path, 70))
+        print("An updated recording was found")
 
-            self.assertTrue(self.observe_for_file_ts_change(recording_file_path, 70))
+        # transcribe
+        # get full transcript
+        print("Sending file for transcription...")
+        transcripts = self.gcloudTranscriber.transcribe_file(recording_file_path)
+        # We need at least one result
+        self.assertGreaterEqual(len(transcripts), 1)
 
-            # transcribe
-            # get full transcript
-            transcripts = self.gcloudTranscriber.transcribe_file(recording_file_path)
-            # We need at least one result
-            self.assertGreaterEqual(len(transcripts), 1)
+        print("Successfully got a transcription: {}".format(transcripts[0]))
 
-            print("Successfully got a transcription: {}".format(transcripts[0]))
+        # Extract pin from transcription
+        text_to_extract_pin = self.normalize_transcript(transcripts[0])
+        matches = re.findall('\d{4,6}', text_to_extract_pin)
 
-            # Extract pin from transcription
-            text_to_extract_pin = self.normalize_transcript(transcripts[0])
-            matches = re.findall('\d{4,6}', text_to_extract_pin)
+        # Check we got the code twice and both are the same to have 100% certain
+        self.assertTrue(len(matches) is 2 and matches[0] == matches[1])
+        received_pin = matches[0]
+        print("Got verification code: {}".format(received_pin))
 
-            # Check we got the code twice and both are the same to have 100% certain
-            self.assertTrue(len(matches) is 2 and matches[0] == matches[1])
-            received_pin = self.normalize_transcript(matches[0])
-            print("Got verification code: {}".format(received_pin))
+        code_elm = driver.find_element_by_id("verify-phone-input")
+        if code_elm:
+            code_elm.send_keys(received_pin)
 
-            code_elm = driver.find_element_by_id("verify-phone-input")
-            if code_elm:
-                code_elm.send_keys(received_pin)
+        time.sleep(10)  # this is a demo visual sleep
 
-            time.sleep(10)  # this is demo visual sleep
+        finish_elm = driver.find_element_by_name("VerifyPhone")
+        if finish_elm:
+            finish_elm.click()
+            # Done!
 
-            finish_elm = driver.find_element_by_name("VerifyPhone")
-            if finish_elm:
-                finish_elm.click()
-
-                # Done ?
-
-        except Exception as e:
-            print("Ex: {}".format(e))
-
-        time.sleep(200)
+        time.sleep(20)
+        self.assertIsNotNone(driver.find_element_by_id("profile-arrow"))
         return
 
     @staticmethod
@@ -204,16 +207,20 @@ class GoogleRegisterSanityTest(unittest.TestCase):
     def normalize_transcript(self, text):
         numbers = [("one", "1"),
                    ("two", "2"),
+                   ("too", "2"),
                    ("three", "3"),
+                   ("tree", "3"),
                    ("four", "4"),
+                   ("for", "4"),
                    ("five", "5"),
                    ("six", "6"),
                    ("seven", "7"),
                    ("eight", "8"),
-                   ("nine", "9"),
+                   ("nine", "9")
                    ]
         for key, val in numbers:
             text = text.replace(key, val)
+        text = text.replace(" ", "")
         return text
 
 
