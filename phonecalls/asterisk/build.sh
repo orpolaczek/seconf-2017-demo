@@ -1,0 +1,1 @@
+docker build -t seconf2017-asterisk .
