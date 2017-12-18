@@ -1,5 +1,5 @@
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -62,7 +62,7 @@ class FBSanityTest(unittest.TestCase):
         mfa_elm = driver.find_element_by_id("approvals_code")
         if mfa_elm:
             mfa_elm.send_keys(self.totp.now())
-
+        time.sleep(5)
         # Click continue (twice, once for TOTP and once for 'save browser'
         for i in range(0,5):
             try:
@@ -71,13 +71,13 @@ class FBSanityTest(unittest.TestCase):
                 continue_elm = driver.find_element_by_id("checkpointSubmitButton")
                 if continue_elm:
                     continue_elm.click()
-                time.sleep(3)
+                time.sleep(1)
                 if driver.find_element_by_id(FacebookAuth.HEADER_PIC_ID):
                     print("Found my pic! break the loop")
                     break
 
-            except Exception as ignored:
-                print("Ignored missing checkpointSubmitButton")
+            except WebDriverException as ignored:
+                pass
 
         time.sleep(10)
 
